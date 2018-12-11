@@ -8,6 +8,8 @@ from pprint import pprint
 class Config:
     # data
     data_dir = '/home/cy/.chainer/dataset/pfnet/chainercv/voc/VOCdevkit/VOC2007/'
+    train_dir = ''
+    test_dir = ''
     min_size = 600  # image resize
     max_size = 1000 # image resize
     num_workers = 8

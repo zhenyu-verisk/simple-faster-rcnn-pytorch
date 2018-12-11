@@ -5,22 +5,32 @@ from dataset import Transform
 from .util import read_image
 
 GHS_CLASSES = ["GHS01_Explosive",
-           "GHS02_Flammable",
-           "GHS03_Oxidizing",
-           "GHS04_CommpressedGas",
-           "GHS05_Corrosive",
-           "GHS06_Toxic",
-           "GHS07_Harmful",
-           "GHS08_HealthHazard",
-           "GHS09_EnviornmentalHazard"
-           ]
+               "GHS02_Flammable",
+               "GHS03_Oxidizing",
+               "GHS04_CommpressedGas",
+               "GHS05_Corrosive",
+               "GHS06_Toxic",
+               "GHS07_Harmful",
+               "GHS08_HealthHazard",
+               "GHS09_EnviornmentalHazard"
+               ]
 
 class PicGHSDataSet:
-    def __init__(self, datafile_path, min_imgsize, max_imgsize, batch_size=None):
+    def __init__(self,
+                 datafile_path,
+                 min_imgsize,
+                 max_imgsize,
+                 test=False,
+                 batch_size=None
+                 ):
         self.ids = [id_.strip() for id_ in open(datafile_path)]
         self.label_names = GHS_CLASSES
         self.batch_size = batch_size
-        self.transformer = Transform(min_size=min_imgsize, max_size=max_imgsize)
+        self.test = test
+        self.transformer = Transform(min_size=min_imgsize,
+                                     max_size=max_imgsize,
+                                     test=test
+                                     )
 
     def __len__(self):
         return len(self.ids)
@@ -30,8 +40,11 @@ class PicGHSDataSet:
             raise IndexError
         id_ = self.ids[idx]
         img, bboxes, labels = self.get_data_by_path(id_)
-        img, bboxes, labels, scale = self.get_transformed_data(img, bboxes, labels)
-        return img.copy(), bbox.copy(), label.copy(), scale
+        img, ori_shape, bboxes, labels, scale = self.get_transformed_data(img, bboxes, labels)
+        if self.test:
+            difficult = [0 for _ in labels]
+            return img.copy(), ori_shape, bboxes.copy(), labels.copy(), difficult
+        return img.copy(), bboxes.copy(), labels.copy(), scale
     
     def __iter__(self):
         if not self.batch_size:
@@ -55,6 +68,7 @@ class PicGHSDataSet:
                     labels_batch = []
                     bboxes_batch = []
                     cnt = 0
+            yield imgs_batch, bboxes_batch, labels_batch
     
     def get_data_by_path(self, imgpath):
         anno_file = imgpath.split('.')[0] + '.txt'
@@ -73,8 +87,8 @@ class PicGHSDataSet:
         return img, np.array(bboxes), np.array(label) 
     
     def get_transformed_data(self, img, bbox, labels)
-        img, bbox, label, scale = self.transformer((ori_img, bbox, label))
-        return img.copy(), bbox.copy(), label.copy(), scale
+        img, ori_shape, bbox, label, scale = self.transformer((ori_img, bbox, label))
+        return img.copy(), ori_shape, bbox.copy(), label.copy(), scale
 
     @staticmethod
     def translate_bbox(img_size, bbox):

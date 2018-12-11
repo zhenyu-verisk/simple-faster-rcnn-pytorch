@@ -51,7 +51,7 @@ def eval(dataloader, faster_rcnn, test_num=10000):
 def train(**kwargs):
     opt._parse(kwargs)
 
-    dataset = PicGHSDataSet(datafile_path = opt.data_dir,
+    dataset = PicGHSDataSet(datafile_path = opt.train_dir,
                             min_imgsize = opt.min_size,
                             max_imgsize = opt.max_size
                             )
@@ -61,13 +61,20 @@ def train(**kwargs):
                                   shuffle=True, \
                                   # pin_memory=True,
                                   num_workers=opt.num_workers)
-    testset = TestDataset(opt)
+    # testset = TestDataset(opt)
+    testset = PicGHSDataSet(datafile_path = opt.train_dir,
+                            min_imgsize = opt.min_size,
+                            max_imgsize = opt.max_size
+                            test = True
+                            )
+
     test_dataloader = data_.DataLoader(testset,
                                        batch_size=1,
                                        num_workers=opt.test_num_workers,
                                        shuffle=False, \
                                        pin_memory=True
                                        )
+
     faster_rcnn = FasterRCNNVGG16()
     print('model construct completed')
     trainer = FasterRCNNTrainer(faster_rcnn).cuda()

@@ -76,14 +76,17 @@ def preprocess(img, min_size=600, max_size=1000):
 
 class Transform(object):
 
-    def __init__(self, min_size=600, max_size=1000):
+    def __init__(self, min_size=600, max_size=1000, test=False):
         self.min_size = min_size
         self.max_size = max_size
+        self.test = test
 
     def __call__(self, in_data):
         img, bbox, label = in_data
         _, H, W = img.shape
         img = preprocess(img, self.min_size, self.max_size)
+        if self.test:
+            return img, (H, W), bbox, label, 1.0
         _, o_H, o_W = img.shape
         scale = o_H / H
         bbox = util.resize_bbox(bbox, (H, W), (o_H, o_W))
@@ -94,7 +97,7 @@ class Transform(object):
         bbox = util.flip_bbox(
             bbox, (o_H, o_W), x_flip=params['x_flip'])
 
-        return img, bbox, label, scale
+        return img, (H, W), bbox, label, scale
 
 
 class Dataset:
