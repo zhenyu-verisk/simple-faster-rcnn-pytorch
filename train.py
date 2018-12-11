@@ -9,6 +9,7 @@ from tqdm import tqdm
 
 from utils.config import opt
 from data.dataset import Dataset, TestDataset, inverse_normalize
+from data.pictogram_ghs import PicGHSDataSet
 from model import FasterRCNNVGG16
 from torch.utils import data as data_
 from trainer import FasterRCNNTrainer
@@ -50,7 +51,10 @@ def eval(dataloader, faster_rcnn, test_num=10000):
 def train(**kwargs):
     opt._parse(kwargs)
 
-    dataset = Dataset(opt)
+    dataset = PicGHSDataSet(datafile_path = opt.data_dir,
+                            min_imgsize = opt.min_size,
+                            max_imgsize = opt.max_size
+                            )
     print('load data')
     dataloader = data_.DataLoader(dataset, \
                                   batch_size=1, \

@@ -1,5 +1,6 @@
 import os
 import numpy as np
+from dataset import Transform
 
 from .util import read_image
 
@@ -15,10 +16,11 @@ GHS_CLASSES = ["GHS01_Explosive",
            ]
 
 class PicGHSDataSet:
-    def __init__(self, datafile_path, batch_size=None):
+    def __init__(self, datafile_path, min_imgsize, max_imgsize, batch_size=None):
         self.ids = [id_.strip() for id_ in open(datafile_path)]
-        self.label_names = VOC_BBOX_LABEL_NAMES
+        self.label_names = GHS_CLASSES
         self.batch_size = batch_size
+        self.transformer = Transform(min_size=min_imgsize, max_size=max_imgsize)
 
     def __len__(self):
         return len(self.ids)
@@ -27,12 +29,14 @@ class PicGHSDataSet:
         if idx >= self.__len__():
             raise IndexError
         id_ = self.ids[idx]
-        return self.get_data_by_path(id_)
+        img, bboxes, labels = self.get_data_by_path(id_)
+        img, bboxes, labels, scale = self.get_transformed_data(img, bboxes, labels)
+        return img.copy(), bbox.copy(), label.copy(), scale
     
     def __iter__(self):
         if not self.batch_size:
             for id_ in self.ids:
-                yield self.get_data_by_path(id_)
+                yield self.__getitem__(id_)
         else:
             imgs_batch = []
             labels_batch = []
@@ -40,7 +44,7 @@ class PicGHSDataSet:
             cnt = 0
             for id_ in self.ids:
                 if cnt < self.batch_size:
-                    img, bbox, label = self.get_data_by_path(id_)
+                    img, bbox, label = self.__getitem__(id_)
                     imgs_batch.append(img)
                     bboxes_batch.append(bbox)
                     labels_batch.append(label)
@@ -67,9 +71,13 @@ class PicGHSDataSet:
                 bboxes.append(bbox_t)
                 labels.append(label)
         return img, np.array(bboxes), np.array(label) 
+    
+    def get_transformed_data(self, img, bbox, labels)
+        img, bbox, label, scale = self.transformer((ori_img, bbox, label))
+        return img.copy(), bbox.copy(), label.copy(), scale
 
-    @classmethod
-    def translate_bbox(cls, img_size, bbox):
+    @staticmethod
+    def translate_bbox(img_size, bbox):
         height, width = img_size
         center_x, center_y, bw, bh = bb[0], bb[1], bb[2], bb[3]
         x_max = int(((2 * center_x + bw) / 2) * width)
