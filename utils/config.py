@@ -1,4 +1,5 @@
 from pprint import pprint
+import os
 
 
 # Default Configs for training
@@ -8,8 +9,8 @@ from pprint import pprint
 class Config:
     # data
     data_dir = '/home/cy/.chainer/dataset/pfnet/chainercv/voc/VOCdevkit/VOC2007/'
-    train_dir = ''
-    test_dir = ''
+    train_dir = os.path.expanduser("~/3E_PirctogramRecognition/config/train.txt")
+    test_dir = os.path.expanduser("~/3E_PirctogramRecognition/config/validation.txt")
     min_size = 600  # image resize
     max_size = 1000 # image resize
     num_workers = 8
