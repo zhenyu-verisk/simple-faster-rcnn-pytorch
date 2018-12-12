@@ -41,7 +41,6 @@ class PicGHSDataSet:
         id_ = self.ids[idx]
         img, bboxes, labels = self.get_data_by_path(id_)
         img, ori_shape, bboxes, labels, scale = self.get_transformed_data(img, bboxes, labels)
-        print('boxes: ', bboxes.shape, 'labels: ', labels.shape)
         if self.test:
             difficult = [0 for _ in labels]
             return img.copy(), ori_shape, bboxes.copy(), labels.copy(), difficult
@@ -75,7 +74,7 @@ class PicGHSDataSet:
         anno_file = imgpath.split('.')[0] + '.txt'
         bboxes = []
         labels = []
-        img = read_image(imgpath, dtype=np.uint8, color=True)
+        img = read_image(imgpath, color=True)
         img_size = img.shape[1:]
         with open(anno_file, 'r') as f:
             for line in f:
@@ -85,11 +84,13 @@ class PicGHSDataSet:
                 bbox_t = self.translate_bbox(img_size, bbox)
                 bboxes.append(bbox_t)
                 labels.append(label)
-        return img, np.array(bboxes), np.array(label) 
+        if len(bboxes) == 0:
+            bboxes = [[]]
+            labels = [[]]
+        return img, np.array(bboxes), np.array(labels) 
     
     def get_transformed_data(self, ori_img, bbox, labels):
         img, ori_shape, bbox, label, scale = self.transformer((ori_img, bbox, labels))
-        print('label:', label.shape, label)
         return img.copy(), ori_shape, bbox.copy(), label.copy(), scale
 
     @staticmethod
