@@ -51,6 +51,8 @@ def eval(dataloader, faster_rcnn, test_num=10000):
 def train(**kwargs):
     opt._parse(kwargs)
 
+    print(opt)
+
     dataset = PicGHSDataSet(datafile_path = opt.train_dir,
                             min_imgsize = opt.min_size,
                             max_imgsize = opt.max_size
@@ -64,7 +66,7 @@ def train(**kwargs):
     # testset = TestDataset(opt)
     testset = PicGHSDataSet(datafile_path = opt.train_dir,
                             min_imgsize = opt.min_size,
-                            max_imgsize = opt.max_size
+                            max_imgsize = opt.max_size,
                             test = True
                             )
 
@@ -81,7 +83,8 @@ def train(**kwargs):
     if opt.load_path:
         trainer.load(opt.load_path)
         print('load pretrained model from %s' % opt.load_path)
-    trainer.vis.text(dataset.db.label_names, win='labels')
+    # trainer.vis.text(dataset.db.label_names, win='labels')
+    trainer.vis.text(dataset.label_names, win='labels')
     best_map = 0
     lr_ = opt.lr
     for epoch in range(opt.epoch):
@@ -140,4 +143,5 @@ def train(**kwargs):
 if __name__ == '__main__':
     import fire
 
+    print('start!')
     fire.Fire()
