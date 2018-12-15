@@ -43,7 +43,7 @@ class PicGHSDataSet:
         img, ori_shape, bboxes, labels, scale = self.get_transformed_data(img, bboxes, labels)
         if self.test:
             difficult = [0 for _ in labels]
-            return img.copy(), ori_shape, bboxes.copy(), labels.copy(), difficult
+            return img.copy(), ori_shape, bboxes.copy(), labels.copy(), np.array(difficult)
         return img.copy(), bboxes.copy(), labels.copy(), scale
     
 #    def __iter__(self):
