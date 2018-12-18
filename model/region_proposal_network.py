@@ -147,8 +147,10 @@ def _enumerate_shifted_anchor(anchor_base, feat_stride, height, width):
     # xp = cuda.get_array_module(anchor_base)
     # it seems that it can't be boosed using GPU
     import numpy as xp
-    shift_y = xp.arange(0, height * feat_stride, feat_stride)
-    shift_x = xp.arange(0, width * feat_stride, feat_stride)
+    # shift_y = xp.arange(0, height * feat_stride, feat_stride)
+    # shift_x = xp.arange(0, width * feat_stride, feat_stride)
+    shift_y = xp.arange(0, height, feat_stride)
+    shift_x = xp.arange(0, width, feat_stride)
     shift_x, shift_y = xp.meshgrid(shift_x, shift_y)
     shift = xp.stack((shift_y.ravel(), shift_x.ravel(),
                       shift_y.ravel(), shift_x.ravel()), axis=1)
